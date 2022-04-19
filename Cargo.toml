@@ -1,0 +1,40 @@
+[package]
+name = "launch-trail"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candid = "0.7"
+hex = "0.4"
+hmac-sha256 = "1.1"
+ic-cdk = "0.5"
+ic-cdk-macros = "0.5"
+serde = "1.0"
+serde_bytes = "0.11"
+spnr-lib = "0.2"
+
+[target.'cfg(unix)'.dependencies]
+clap = { version = "3.1", features = [ "derive" ] }
+ic-agent = "0.15"
+leb128 = "0.2"
+serde-bytes-repr = "0.1"
+serde_cbor = "0.11"
+serde_json = { version = "1.0" }
+tokio = { version = "1.8", features = [ "full" ] }
+
+[profile.release]
+lto = true
+opt-level = 'z'
+panic = 'abort'
+
+[[bin]]
+name = "launch-trail"
+path = "./src/launch-trail.rs"
+
+[[bin]]
+name = "hello"
+path = "./src/hello.rs"
+
+[[bin]]
+name = "canister-info"
+path = "./src/canister-info.rs"

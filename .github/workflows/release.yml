@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [ '1.58.1' ]
+        os: [ ubuntu-latest, macos-latest ]
+        include:
+          - os: ubuntu-latest
+            name: x86_64-linux
+          - os: macos-latest
+            name: x86_64-darwin
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup environment variables
+      run: |
+        echo "SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        echo "OPENSSL_STATIC=yes" >> $GITHUB_ENV
+
+    - name: Setup environment variables
+      run: |
+        echo "OPENSSL_LIB_DIR=/usr/lib/x86_64-linux-gnu/" >> $GITHUB_ENV
+        echo "OPENSSL_INCLUDE_DIR=/usr/include/" >> $GITHUB_ENV
+      if: contains(matrix.os, 'ubuntu')
+
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+
+    - name: Install binaryen (Linux)
+      run: |
+        set -e
+        curl -L https://github.com/WebAssembly/binaryen/releases/download/version_105/binaryen-version_105-x86_64-linux.tar.gz | tar zxf -
+        echo "`pwd`/binaryen-version_105/bin" > $GITHUB_PATH
+      if: contains(matrix.os, 'ubuntu')
+
+    - name: Install binaryen (OS X)
+      run: |
+        set -e
+        curl -L https://github.com/WebAssembly/binaryen/releases/download/version_105/binaryen-version_105-x86_64-macos.tar.gz | tar xzf -
+        echo "`pwd`/binaryen-version_105/bin" > $GITHUB_PATH
+      if: contains(matrix.os, 'macos')
+
+    - name: Build
+      run: |
+        rustup target add wasm32-unknown-unknown
+        make release
+
+    - name: Post build (Linux)
+      run: |
+        cd dist
+        strip canister-info
+        ldd canister-info
+      if: contains(matrix.os, 'ubuntu')
+
+    - name: Post build (OS X)
+      run: |
+        cd dist
+        strip canister-info
+        otool -L canister-info
+      if: contains(matrix.os, 'macos')
+
+    - name: Create Makefile and cleanup
+      run: |
+        echo RELEASE_TAG=${{ env.SHA_SHORT }} > dist/Makefile
+        echo GITHUB_REPO=${{ github.repository }} >> dist/Makefile
+        cat mk/Makefile.inc >> dist/Makefile
+        shasum -a 256 dist/launch-trail.wasm > dist/launch-trail.wasm.sha256
+        shasum -a 256 dist/canister-info > dist/canister-info-${{ matrix.name }}.sha256
+        mv dist/canister-info dist/canister-info-${{ matrix.name }}
+
+    - name: Upload launch-trail
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/launch-trail*
+        tag: ${{ env.SHA_SHORT }}
+        file_glob: true
+      if: contains(matrix.os, 'ubuntu')
+
+    - name: Upload canister-info
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/canister-info*
+        tag: ${{ env.SHA_SHORT }}
+        file_glob: true
+
+    - name: Upload Makefile
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: dist/Makefile
+        asset_name: Makefile
+        tag: ${{ env.SHA_SHORT }}
+      if: contains(matrix.os, 'ubuntu')

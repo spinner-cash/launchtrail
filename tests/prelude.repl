@@ -1,0 +1,43 @@
+function create_canister() {
+  let id = call ic.provisional_create_canister_with_cycles(record { settings = null; amount = null });
+  id.canister_id
+};
+
+function deploy(id, wasm, did, arg) {
+  call ic.install_code(
+    record {
+      arg = encode did.__init_args(arg);
+      wasm_module = wasm;
+      mode = variant { install };
+      canister_id = id;
+    },
+  )
+};
+
+identity private "../dist/private.pem";
+let launch_trail = create_canister();
+import did = "2vxsx-fae" as "../dist/launch-trail.did";
+let _ = deploy(launch_trail, file "../dist/launch-trail.wasm", did, record { bucket_size = 1000; max_buckets = 1000; "config" = record { min_schedule = 0; submitters = vec { private }; revokers = vec { private }; }; });
+
+function submit(canister, method, requires) {
+  call launch_trail.submit(record {
+    canister = canister;
+    method = method;
+    requires = requires;
+    sha256 = null;
+    expires = variant { In = 10_000_000_000 };
+    activates = variant { In = 1_000_000 }; 
+    revokers = null;
+    executors = null;
+    payment = 0;
+    url = "";
+  })
+};
+
+function execute(index, args) {
+  call launch_trail.execute(record { index = index; args = args })
+};
+
+function revoke(index, reason) {
+  call launch_trail.execute(record { index = index; reason = reason })
+};

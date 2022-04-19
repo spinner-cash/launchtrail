@@ -1,0 +1,75 @@
+type Action = record {
+  url : text;
+  method : text;
+  activates : Schedule;
+  sha256 : opt text;
+  expires : Schedule;
+  revokers : opt vec principal;
+  canister : principal;
+  executors : opt vec principal;
+  requires : vec nat64;
+  payment : nat;
+};
+type Config = record {
+  revokers : vec principal;
+  submitters : vec principal;
+  min_schedule : nat64;
+};
+type ExecuteArgs = record { args : vec nat8; index : nat64 };
+type ExecuteError = variant {
+  Inactive;
+  NotFoundOrExpired;
+  InvalidChecksum;
+  CapacityFull;
+  Unauthorized;
+  RequiresNotOk : nat64;
+  ChecksumMismatch;
+  Expired;
+};
+type InitialConfig = record {
+  bucket_size : nat64;
+  config : Config;
+  max_buckets : nat64;
+};
+type Item = variant {
+  Error : record { nat64; int32; text };
+  Action : Action;
+  Response : record { nat64; vec nat8 };
+};
+type Record = record { item : Item; time : nat64; caller : opt principal };
+type Result = variant { Ok : vec nat8; Err : record { int32; text } };
+type RevokeArgs = record { index : nat64; reason : text };
+type RevokeError = variant {
+  NotFoundOrExpired;
+  CapacityFull;
+  Unauthorized;
+  Expired;
+};
+type Schedule = variant { At : nat64; In : nat64 };
+type Stats = record {
+  number_of_entries : nat64;
+  first_in_memory_index : nat64;
+  total_bytes_used : nat64;
+  current_time : nat64;
+  scheduled_actions : nat64;
+  config : Config;
+  max_entries_allowed : nat64;
+  active_actions : nat64;
+  max_view_range : nat64;
+};
+type SubmitError = variant {
+  ActivatesTooSoon;
+  InvalidChecksum;
+  InvalidRequires : nat64;
+  CapacityFull;
+  InvalidExpires;
+  Unauthorized;
+};
+service : (InitialConfig) -> {
+  submit : (Action) -> (variant { Ok : nat64; Err : SubmitError });
+  execute : (ExecuteArgs) -> (variant { Ok : Result; Err : ExecuteError });
+  revoke : (RevokeArgs) -> (variant { Ok; Err : RevokeError });
+  configure : (Config) -> ();
+  stats : () -> (Stats) query;
+  records : (nat64, nat64) -> (vec Record) query;
+}
