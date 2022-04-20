@@ -1,4 +1,4 @@
-<div id="header" align="center"><img src="https://github.com/spnrapp/launch-trail/raw/main/icon/blue-on-white-outline.png" width="300"/></div>
+<div id="header" align="center"><img src="https://github.com/spinner-cash/launch-trail/raw/main/icon/blue-on-white-outline.png" width="300"/></div>
 
 #
 
