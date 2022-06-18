@@ -5,12 +5,12 @@ let j = result.Ok;
 let result = submit(principal "aaaaa-aa", "install_code", vec { j : nat64 });
 let k = result.Ok;
 
-let result = execute(i, encode (record { settings = opt record { controllers = opt vec { launch_trail } } }));
+let result = execute(i, encode (record { settings = opt record { controllers = opt vec { launchtrail } } }));
 let result = decode result.Ok.Ok;
 let hello = result.canister_id;
 let result = execute(j, encode (record { canister_id = hello }));
 let status = decode result.Ok.Ok;
-assert status ~= record { settings = record { controllers = vec { launch_trail } } };
+assert status ~= record { settings = record { controllers = vec { launchtrail } } };
 let result = execute(k, encode (record { mode = variant { install }; canister_id = hello; wasm_module = file "../dist/hello.wasm"; arg = encode (); }));
 let _ = decode result.Ok.Ok;
 let result = call hello.greet("World");

@@ -1,5 +1,5 @@
 CANISTER_INFO=dist/canister-info
-LAUNCH_TRAIL=dist/launch-trail.wasm dist/launch-trail.did
+LAUNCH_TRAIL=dist/launchtrail.wasm dist/launchtrail.did
 HELLO=dist/hello.wasm dist/hello.did
 TESTS=configure install
 ARGUMENT=(record {bucket_size = 1000 : nat64; max_buckets = 1000 : nat64; config = record { revokers = vec { principal "SUBMITTER" }; submitters = vec { principal "SUBMITTER" }; min_schedule = 0 : nat64;}})
@@ -36,17 +36,17 @@ dist/private.pem: dist/seed.txt | dist
 	keysmith private-key -f $< -o $@
 
 dfx.json:
-	echo '{"canisters":{"launch-trail":{"type":"custom","candid":"dist/launch-trail.did","wasm":"dist/launch-trail.wasm","build":""}}}' > $@
+	echo '{"canisters":{"launchtrail":{"type":"custom","candid":"dist/launchtrail.did","wasm":"dist/launchtrail.wasm","build":""}}}' > $@
 
 deploy: dfx.json
-	dfx deploy launch-trail $(OPTS) --argument "$$(echo '$(ARGUMENT)'|sed -e "s/SUBMITTER/$$(dfx identity get-principal)/g")"
+	dfx deploy launchtrail $(OPTS) --argument "$$(echo '$(ARGUMENT)'|sed -e "s/SUBMITTER/$$(dfx identity get-principal)/g")"
 
 test: default dist/private.pem
 	cd tests && ./run.sh $(TESTS)
 
 clean:
 	rm -rf dist
-	rm -f target
+	rm -rf target
 	rm -rf test/test-????????.repl test/config.dhall
 
 .PHONY: default release test deploy clean

@@ -1,8 +1,10 @@
-<div id="header" align="center"><img src="https://github.com/spinner-cash/launch-trail/raw/main/icon/blue-on-white-outline.png" width="300"/></div>
+<div id="header" align="center"><img src="../../raw/main/icon/blue-on-white-outline.png" width="300"/></div>
 
 #
 
 **LaunchTrail: Simple and Secure Release Management for Internet Computer Projects**
+
+![release](../../actions/workflows/release.yml/badge.svg)
 
 There are many ways to configure and update canisters and services on the [Internet Computer].
 But the challenge is how to do them in a secure and auditable manner, bringing more transparency and confidence to the community of a project.
@@ -58,29 +60,29 @@ That being said, it is still recommended that a submitter provides both the chec
 
 ## Usage
 
-The first step is to [download a public release of LaunchTrail](https://github.com/spinner-cash/launch-trail/releases).
+The first step is to [download a public release of lanchtrail.wasm](../../releases).
 
-The latest SHA-256 hash of the `launch-trail.wasm` file should match the output below:
+The latest SHA-256 hash of the `launchtrail.wasm` file should match the output below:
 
 ```
-$ sha256sum launch-trail.wasm
-7ada16c407db36d33ddaff95126abaa894ac7035ce8c2e58115b7344c2b0ca0b  launch-trail.wasm
+$ shasum -a 256 launchtrail.wasm
+f14477489935a855e8cd417dec5374585da6c03432ad0142be3d2507cb9dd117  launchtrail.wasm
 ```
 
 You can also fork this repo to have Github Actions build from source if you want to independently verify a release.
 
 **Deploy LaunchTrail**
 
-The fastest way to deploy is to can download the `Makefile` from a release and run the following command (requires [GNU make] and [dfx]):
+The fastest way to deploy is to download the `Makefile` from a release and run the following command (requires [GNU make] and [dfx]):
 
 ```
 make deploy NETWORK=ic
 ```
 
 This will download release binaries (see `RELEASE_TAG` in the Makefile), verify checksum, and deploy a canister using [dfx].
-If all goes well, you will find the canister id of `"launch-trail"` in the `canister_ids.json` file created in the same directory.
+If all goes well, you will find the canister id of "launchtrail" in the `canister_ids.json` file created in the same directory.
 
-Omit the `NETWORK=ic` part if you only want to deploy locally.
+Omit the `NETWORK=ic` part if you only want to test the deployment locally.
 
 **Make LaunchTrail immutable**
 
@@ -90,7 +92,7 @@ We can achieve the same purpose by removing all controllers, but only controller
 So using [Black Hole] is recommended.
 
 ```
-dfx canister --network=ic update-settings launch-trail --controller e3mmv-5qaaa-aaaah-aadma-cai
+dfx canister --network=ic update-settings launchtrail --controller e3mmv-5qaaa-aaaah-aadma-cai
 ```
 
 It is no longer upgradable after this.
@@ -98,26 +100,26 @@ It is no longer upgradable after this.
 Next, we should keep an permanent record of the LaunchTrail canister info:
 
 ```
-./dist/canister-info fetch $(dfx canister --network=ic id launch-trail) > launch_trail_info.json
-./dist/canister-info verify < launch_trail_info.json
+./dist/canister-info fetch $(dfx canister --network=ic id launchtrail) > launchtrail_info.json
+./dist/canister-info verify < launchtrail_info.json
 ```
 
 The `canister-info fetch` command fetches the (certificate of) canister info, and the `canister-info verify` command reads the info from stdin, and verifies its signature using IC's public key.
 If successfully verified, it prints in human readable text the canister id, module hash, controllers, and creation time of this info (nano seconds since UNIX epoch).
-This can serve as a proof that LaunchTrail was made immutable before the time stamp in the canister info.
+This can serve as a proof that LaunchTrail was made immutable before the time stamp shown in the canister info.
 
 Because this info is verifiable against the IC's public key, all records created by the LaunchTrail later will be trust-worthy because:
 
 1. The LaunchTrail canister is immutable, We can be sure no one is able to change its code.
 2. The LaunchTrail canister's module hash can be verified against a public release. We can check its source code and Github build process to confirm.
-3. The LaunchTrail canister will record all scheduled actions and their executions in an append only log stored in the canister's stable memory.
+3. The LaunchTrail canister will record all scheduled actions and their execution results in an append only log stored in the canister's stable memory.
 
 All action records can be retrieved programmatically by calling the `records(..)` method on the canister.
 And a simple HTTP interface will be provided in a future release for even easier access.
 
 **Deploy project canisters**
 
-The LaunchTrail canister has a simple interface given below, and more details can be found in its [Candid file](./launch-trail.did).
+The LaunchTrail canister has a simple interface given below, and more details can be found in its [Candid file](./launchtrail.did).
 
 ```
 service : (InitialConfig) -> {
@@ -130,7 +132,7 @@ service : (InitialConfig) -> {
 }
 ```
 
-We are working on a tool to help make managing LaunchTrail actions and records, and will update this space once it is ready.
+We are working on a tool to help manage LaunchTrail actions and records, and will update this space once it is ready.
 
 For now, you can look at how it is being used in [tests](./tests/) (requires [ic-repl]).
 

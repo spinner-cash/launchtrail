@@ -15,12 +15,12 @@ function deploy(id, wasm, did, arg) {
 };
 
 identity private "../dist/private.pem";
-let launch_trail = create_canister();
-import did = "2vxsx-fae" as "../dist/launch-trail.did";
-let _ = deploy(launch_trail, file "../dist/launch-trail.wasm", did, record { bucket_size = 1000; max_buckets = 1000; "config" = record { min_schedule = 0; submitters = vec { private }; revokers = vec { private }; }; });
+let launchtrail = create_canister();
+import did = "2vxsx-fae" as "../dist/launchtrail.did";
+let _ = deploy(launchtrail, file "../dist/launchtrail.wasm", did, record { bucket_size = 1000; max_buckets = 1000; "config" = record { min_schedule = 0; submitters = vec { private }; revokers = vec { private }; }; });
 
 function submit(canister, method, requires) {
-  call launch_trail.submit(record {
+  call launchtrail.submit(record {
     canister = canister;
     method = method;
     requires = requires;
@@ -35,9 +35,9 @@ function submit(canister, method, requires) {
 };
 
 function execute(index, args) {
-  call launch_trail.execute(record { index = index; args = args })
+  call launchtrail.execute(record { index = index; args = args })
 };
 
 function revoke(index, reason) {
-  call launch_trail.execute(record { index = index; reason = reason })
+  call launchtrail.execute(record { index = index; reason = reason })
 };
