@@ -1,6 +1,6 @@
 [package]
-name = "launch-trail"
-version = "0.1.0"
+name = "launchtrail"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
@@ -28,8 +28,8 @@ opt-level = 'z'
 panic = 'abort'
 
 [[bin]]
-name = "launch-trail"
-path = "./src/launch-trail.rs"
+name = "launchtrail"
+path = "./src/launchtrail.rs"
 
 [[bin]]
 name = "hello"

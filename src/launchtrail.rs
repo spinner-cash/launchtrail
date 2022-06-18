@@ -8,7 +8,7 @@
 //!
 //! A project can use an immutable LaunchTrail canister to create and manage other canisters in a secure and verifiable manner.
 //!
-//! Please see <https://github.com/spinner-cash/launch-trail> for more information.
+//! Please see <https://github.com/spinner-cash/launchtrail> for more information.
 use hex::FromHex;
 use ic_cdk::export::{
     candid::{candid_method, CandidType},
